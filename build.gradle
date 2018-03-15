@@ -220,20 +220,20 @@ uploadArchives {
             }
             
             pom.groupId = 'com.github.mdre'
-            pom.artifactId = 'odbogm'
+            pom.artifactId = 'odbogm-agent'
             
             
             pom.project {
-                name 'Object to OrientDB Graph mapper'
+                name 'ODBOGM Class Instrumentation Agent'
                 packaging 'jar'
                 // optionally artifactId can be defined here 
-                description 'ODBOGM let you store/retrieve object in a OrientDB graph structure in a clear and simple way.'
-                url 'https://github.com/mdre/odbogm'
+                description 'ODBOGM Agent instrument class at runtime to detect dirty object.'
+                url 'https://github.com/mdre/odbogm-agent'
 
                 scm {
-                    connection 'scm:git:git://github.com/mdre/odbogm.git'
-                    developerConnection 'scm:git:ssh://github.com/mdre/odbogm.git'
-                    url 'https://github.com/mdre/odbogm'
+                    connection 'scm:git:git://github.com/mdre/odbogm-agent.git'
+                    developerConnection 'scm:git:ssh://github.com/mdre/odbogm-agent.git'
+                    url 'https://github.com/mdre/odbogm-agent'
                 }
 
                 licenses {
