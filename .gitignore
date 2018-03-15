@@ -1,0 +1,9 @@
+.gradle/
+.nb-gradle/
+/build/
+rebel.xml
+.~lock*
+*.zargo~
+/build/
+.*
+!.gitignore
