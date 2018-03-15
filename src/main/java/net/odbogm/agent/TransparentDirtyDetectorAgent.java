@@ -111,7 +111,7 @@ public class TransparentDirtyDetectorAgent {
      * Programmatic hook to dynamically load javaagent at runtime.
      * It could be load with JVM parameters.
      * Ej:
-     * -javaagent:/<path-to-glassfish>/domains/domain1/lib/ext/odbogm-agent-x.x.x.jar
+     * -javaagent:/path-to-glassfish/domains/domain1/lib/ext/odbogm-agent-x.x.x.jar
      */
     public static void initialize() {
         if (instrumentation == null) {
