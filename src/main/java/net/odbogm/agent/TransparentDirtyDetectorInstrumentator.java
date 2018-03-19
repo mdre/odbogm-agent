@@ -29,6 +29,9 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
     static {
         if (LOGGER.getLevel() == null) {
             LOGGER.setLevel(LogginProperties.TransparentDirtyDetectorInstrumentator);
+        } else {
+            
+            System.out.println("TDDI: "+LOGGER.getLevel());
         }
     }
 //    public TransparentDirtyDetectorInstrumentator() {
@@ -52,11 +55,11 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
      * @throws IllegalClassFormatException ex
      */
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class classBeingRedefined,
+    public synchronized byte[] transform(ClassLoader loader, String className, Class classBeingRedefined,
             ProtectionDomain protectionDomain, byte[] classfileBuffer)
             throws IllegalClassFormatException {
 
-        LOGGER.log(Level.FINEST, "preprocesando clase: {0}...", className);
+        LOGGER.log(Level.FINEST, "analizando clase: {0}...", className);
 
 //        if (isInstrumentable(className)) {
         // forzar la recarga
@@ -77,9 +80,12 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
                     + "\n****************************************************************************"
                     + "\nRedefiniendo on-the-fly {0}..."
                     + "\n****************************************************************************", className);
-            cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
+            ClassReader crRedefine = new ClassReader(classfileBuffer);
+            
+            cw = new ClassWriter(crRedefine, ClassWriter.COMPUTE_FRAMES);
             TransparentDirtyDetectorAdapter taa = new TransparentDirtyDetectorAdapter(cw);
-            cr.accept(taa, 0);
+            
+            crRedefine.accept(taa, ClassReader.EXPAND_FRAMES);
             
             // instrumentar el método ___getDirty()
             LOGGER.log(Level.FINER, "insertando el método ___isDirty() ...");
@@ -105,6 +111,11 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
             if (LogginProperties.TransparentDirtyDetectorInstrumentator == Level.FINER) {
                 writeToFile(className, cw.toByteArray());
             }
+            LOGGER.log(Level.FINER,  "FIN instrumentación {0}"
+                                    + "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+                                    +"\n****************************************************************************",
+                    className
+                    );
             return cw.toByteArray();
         }
         return classfileBuffer;
@@ -131,7 +142,7 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
         }
     }
 
-    public boolean isInterface(ClassReader cr) {
+    public synchronized boolean isInterface(ClassReader cr) {
         return ((cr.getAccess() & 0x200) != 0);
     }
 }

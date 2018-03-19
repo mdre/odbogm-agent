@@ -47,6 +47,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         if (name.equals(DIRTYMARK)) {
             isFieldPresent = true;
+            LOGGER.log(Level.FINER, "El campo ya existe!!!! WARNING!!! Esto no deberia ocurrir!!! ************************");
         }
         return cv.visitField(access, name, desc, signature, value);
     }
@@ -54,11 +55,13 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv;
-        LOGGER.log(Level.FINEST, "visitando método: " + name);
+        LOGGER.log(Level.FINEST, "visitando método: " + name + " signature: "+signature);
         mv = cv.visitMethod(access, name, desc, signature, exceptions);
         if ((mv != null) && !name.equals("<init>") && !name.equals("<clinit>") ) {
             LOGGER.log(Level.FINER, ">>>>>>>>>>> Instrumentando método: " + name);
             mv = new WriteAccessActivatorAdapter(mv);
+        } else {
+            LOGGER.log(Level.FINEST, "mv = NULL !!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }
         return mv;
     }

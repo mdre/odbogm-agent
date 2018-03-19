@@ -37,7 +37,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public synchronized void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         String ddi = ITransparentDirtyDetector.class.getName().replace(".", "/");
         this.clazzName = name;
         for (String aInterface : interfaces) {
@@ -51,7 +51,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     }
 
     @Override
-    public AnnotationVisitor visitAnnotation(String ann, boolean bln) {
+    public synchronized  AnnotationVisitor visitAnnotation(String ann, boolean bln) {
         LOGGER.log(Level.FINEST, "Annotation: >"+ann+"<");
         if (ann.startsWith("Lnet/odbogm/annotations/Entity")) {
             LOGGER.log(Level.FINER, clazzName + ": Annotation: >"+ann+"<");
@@ -61,10 +61,18 @@ public class InstrumentableClassDetector extends ClassVisitor  {
         return super.visitAnnotation(ann, bln); 
     }
 
-    public boolean isInstrumentable() {
+    @Override
+    public synchronized MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        MethodVisitor mv;
+        LOGGER.log(Level.FINEST, "visitando método: " + name + " signature: "+signature);
+        mv = cv.visitMethod(access, name, desc, signature, exceptions);
+        return mv;
+    }
+    
+    public synchronized boolean isInstrumentable() {
         return this.isInstrumetable;
     }
-    public boolean isInstrumented() {
+    public synchronized boolean isInstrumented() {
         return this.isInstrumented;
     }
 }

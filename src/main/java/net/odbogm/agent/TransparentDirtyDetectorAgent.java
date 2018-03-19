@@ -82,10 +82,15 @@ public class TransparentDirtyDetectorAgent {
      *
      * @param args args
      * @param inst inst
-     * @throws Exception ex
+     * throws Exception ex
      */
-    public static void premain(String args, Instrumentation inst) throws Exception {
+    public static void premain(String args, Instrumentation inst)  {
+        LOGGER.log(Level.INFO, "");
+        LOGGER.log(Level.INFO, "===============================================");
+        LOGGER.log(Level.INFO, "Transparent Dirty Detector Agente is loading...");
+        LOGGER.log(Level.INFO, "===============================================");
         LOGGER.log(Level.FINER, "premain method invoked with args: {0} and inst: {1}", new Object[]{args, inst});
+        LOGGER.log(Level.INFO, "");
         instrumentation = inst;
 //        instrumentation.addTransformer(new TransparentDirtyDetectorInstrumentator(args.split(";")));
         instrumentation.addTransformer(new TransparentDirtyDetectorInstrumentator());
@@ -98,10 +103,15 @@ public class TransparentDirtyDetectorAgent {
      *
      * @param args args
      * @param inst inst
-     * @throws Exception ex
+     * throws Exception ex
      */
-    public static void agentmain(String args, Instrumentation inst) throws Exception {
+    public static void agentmain(String args, Instrumentation inst)  {
+        LOGGER.log(Level.INFO, "");
+        LOGGER.log(Level.INFO, "===============================================");
+        LOGGER.log(Level.INFO, "Transparent Dirty Detector Agente is loading...");
+        LOGGER.log(Level.INFO, "===============================================");
         LOGGER.log(Level.FINER, "agentmain method invoked with args: {0} and inst: {1}", new Object[]{args, inst});
+        LOGGER.log(Level.INFO, "");
         instrumentation = inst;
 //        instrumentation.addTransformer(new TransparentDirtyDetectorInstrumentator(args.split(";")));
         instrumentation.addTransformer(new TransparentDirtyDetectorInstrumentator());
