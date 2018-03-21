@@ -32,7 +32,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
 //    private boolean isInstrumetable = false;
 
     public TransparentDirtyDetectorAdapter(ClassVisitor cv) {
-        super(Opcodes.ASM4, cv);
+        super(Opcodes.ASM6, cv);
     }
 
     @Override
@@ -60,6 +60,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
         if ((mv != null) && !name.equals("<init>") && !name.equals("<clinit>") ) {
             LOGGER.log(Level.FINER, ">>>>>>>>>>> Instrumentando método: " + name);
             mv = new WriteAccessActivatorAdapter(mv);
+            LOGGER.log(Level.FINEST, "fin instrumentación ---------------------------------------------------");
         } else {
             LOGGER.log(Level.FINEST, "mv = NULL !!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }

@@ -26,17 +26,19 @@ import org.objectweb.asm.Opcodes;
 public class TransparentDirtyDetectorInstrumentator implements ClassFileTransformer, ITransparentDirtyDetectorDef {
 
     private final static Logger LOGGER = Logger.getLogger(TransparentDirtyDetectorInstrumentator.class.getName());
+
     static {
         if (LOGGER.getLevel() == null) {
             LOGGER.setLevel(LogginProperties.TransparentDirtyDetectorInstrumentator);
         } else {
-            
-            System.out.println("TDDI: "+LOGGER.getLevel());
+
+            System.out.println("TDDI: " + LOGGER.getLevel());
         }
     }
 //    public TransparentDirtyDetectorInstrumentator() {
 //        this.pkgs = TransparentDirtyDetectorAgent.pkgs;
 //    }
+
     /**
      * Instrumentador
      */
@@ -81,53 +83,86 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
                     + "\nRedefiniendo on-the-fly {0}..."
                     + "\n****************************************************************************", className);
             ClassReader crRedefine = new ClassReader(classfileBuffer);
-            
-            cw = new ClassWriter(crRedefine, ClassWriter.COMPUTE_FRAMES);
-            TransparentDirtyDetectorAdapter taa = new TransparentDirtyDetectorAdapter(cw);
-            
-            crRedefine.accept(taa, ClassReader.EXPAND_FRAMES);
-            
-            // instrumentar el método ___getDirty()
-            LOGGER.log(Level.FINER, "insertando el método ___isDirty() ...");
-            MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, ISDIRTY, "()Z", null, null);
-            mv.visitCode();
-            mv.visitVarInsn(Opcodes.ALOAD, 0);
-            mv.visitFieldInsn(Opcodes.GETFIELD, className, DIRTYMARK, "Z");
-            mv.visitInsn(Opcodes.IRETURN);
-            mv.visitMaxs(1, 1);
-            mv.visitEnd();
 
-            // instrumentar el método ___setDirty()
-            LOGGER.log(Level.FINER, "insertando el método ___setDirty() ...");
-            mv = cw.visitMethod(Opcodes.ACC_PUBLIC, SETDIRTY, "(Z)V", null, null);
-            mv.visitCode();
-            mv.visitVarInsn(Opcodes.ALOAD, 0);
-            mv.visitVarInsn(Opcodes.ILOAD, 1);
-            mv.visitFieldInsn(Opcodes.PUTFIELD, className, DIRTYMARK, "Z");
-            mv.visitInsn(Opcodes.RETURN);
-            mv.visitMaxs(1, 1);
-            mv.visitEnd();
+            cw = new ClassWriter(crRedefine, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) {
+                // Asegurar que se usa el mismo CL para cargar las clases.
+                @Override
+                protected String getCommonSuperClass(String type1, String type2) {
+                    LOGGER.log(Level.INFO, "type1: " + type1 + "   - type2: " + type2);
+                    Class<?> c, d;
+                    try {
+                        c = Class.forName(type1.replace('/', '.'), false, loader);
+                        d = Class.forName(type2.replace('/', '.'), false, loader);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e.toString());
+                    }
+                    if (c.isAssignableFrom(d)) {
+                        return type1;
+                    }
+                    if (d.isAssignableFrom(c)) {
+                        return type2;
+                    }
+                    if (c.isInterface() || d.isInterface()) {
+                        return "java/lang/Object";
+                    } else {
+                        do {
+                            c = c.getSuperclass();
+                        } while (!c.isAssignableFrom(d));
+                        return c.getName().replace('.', '/');
+                    }
 
-            if (LogginProperties.TransparentDirtyDetectorInstrumentator == Level.FINER) {
-                writeToFile(className, cw.toByteArray());
+//                return super.getCommonSuperClass(type1, type2);
             }
-            LOGGER.log(Level.FINER,  "FIN instrumentación {0}"
-                                    + "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-                                    +"\n****************************************************************************",
-                    className
-                    );
-            return cw.toByteArray();
+                
+        };
+        TransparentDirtyDetectorAdapter taa = new TransparentDirtyDetectorAdapter(cw);
+        try {
+            crRedefine.accept(taa, ClassReader.EXPAND_FRAMES);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "ERROR <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+            e.printStackTrace();
         }
-        return classfileBuffer;
-    }
+        // instrumentar el método ___getDirty()
+        LOGGER.log(Level.FINER, "insertando el método ___isDirty() ...");
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, ISDIRTY, "()Z", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, className, DIRTYMARK, "Z");
+        mv.visitInsn(Opcodes.IRETURN);
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
 
-    /**
-     * Herramienta para realizar un volcado de la clase a disco.
-     *
-     * @param className nombre del archivo a graba
-     * @param myByteArray datos de la clase.
-     */
-    private void writeToFile(String className, byte[] myByteArray) {
+        // instrumentar el método ___setDirty()
+        LOGGER.log(Level.FINER, "insertando el método ___setDirty() ...");
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC, SETDIRTY, "(Z)V", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(Opcodes.ILOAD, 1);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, className, DIRTYMARK, "Z");
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+
+        if (LogginProperties.TransparentDirtyDetectorInstrumentator == Level.FINER) {
+            writeToFile(className, cw.toByteArray());
+        }
+        LOGGER.log(Level.FINER, "FIN instrumentación {0}"
+                + "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+                + "\n****************************************************************************",
+                className
+        );
+        return cw.toByteArray();
+    }
+    return classfileBuffer ;
+}
+
+/**
+ * Herramienta para realizar un volcado de la clase a disco.
+ *
+ * @param className nombre del archivo a graba
+ * @param myByteArray datos de la clase.
+ */
+private void writeToFile(String className, byte[] myByteArray) {
         try {
             File theDir = new File("/tmp/asm");
             if (!theDir.exists()) {
@@ -137,8 +172,11 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
             FileOutputStream fos = new FileOutputStream("/tmp/asm/" + className.substring(className.lastIndexOf("/")) + ".class");
             fos.write(myByteArray);
             fos.close();
-        } catch (IOException ex) {
-            Logger.getLogger(TransparentDirtyDetectorInstrumentator.class.getName()).log(Level.SEVERE, null, ex);
+        
+
+} catch (IOException ex) {
+            Logger.getLogger(TransparentDirtyDetectorInstrumentator.class
+.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

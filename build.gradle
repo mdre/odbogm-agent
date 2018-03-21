@@ -55,7 +55,7 @@ task autoBuildNumber {
                                 '.'+( versionParts.length==4 ? (versionParts[3].toInteger()+1).toString():"1")
                 
                 line = "version="+versionNumber
-                println line
+//                println line
             }
             printWriter.println(line)
         }
@@ -67,7 +67,12 @@ task autoBuildNumber {
 if (! project.gradle.startParameter.taskNames.join(",").toLowerCase().contains("release") ) {
     build.dependsOn autoBuildNumber
 }
-
+build.doLast {
+        println "***************************************************************"
+        println "SISTEMA: " + name
+        println "VERSION: " + version
+        println "***************************************************************"
+}
 
 
 // seteo carpeta de fuentes para sonar

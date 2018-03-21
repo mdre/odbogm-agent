@@ -28,7 +28,7 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
     }
     
     public WriteAccessActivatorAdapter(MethodVisitor mv) {
-        super(Opcodes.ASM4, mv);
+        super(Opcodes.ASM6, mv);
     }
 
     @Override
@@ -54,6 +54,12 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
         } 
         mv.visitFieldInsn(opcode, owner, name, desc); 
         LOGGER.log(Level.FINEST, "fin --------------------------------------------------");
+    }
+
+    @Override
+    public void visitEnd() {
+        LOGGER.log(Level.FINEST, "fin MethodVisitor -------------------------------------");
+        super.visitEnd(); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
