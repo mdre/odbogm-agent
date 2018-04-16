@@ -142,7 +142,19 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
-
+        
+        // detectar si tiene el contructor por defecto y en caso de no tenerlo insertar uno.
+        if (!icd.hasDefaultContructor()) {
+            LOGGER.log(Level.FINER, "No se ha encontrado el contructor por defecto. Insertando uno...");
+            mv=cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            mv.visitInsn(Opcodes.RETURN);
+            mv.visitMaxs(1,1);
+            mv.visitEnd();
+        }
+        
         if (LogginProperties.TransparentDirtyDetectorInstrumentator == Level.FINER) {
             writeToFile(className, cw.toByteArray());
         }

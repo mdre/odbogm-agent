@@ -30,6 +30,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     
     private boolean isInstrumetable = false;
     private boolean isInstrumented = false;
+    private boolean hasDefaultContructor = false;
     private String clazzName = null;
     
     public InstrumentableClassDetector(ClassVisitor cv) {
@@ -66,6 +67,9 @@ public class InstrumentableClassDetector extends ClassVisitor  {
         MethodVisitor mv;
         LOGGER.log(Level.FINEST, "visitando método: " + name + " signature: "+signature);
         mv = cv.visitMethod(access, name, desc, signature, exceptions);
+        if ((mv != null) && name.equals("<init>") && signature == null ) {
+            hasDefaultContructor = true;
+        }
         return mv;
     }
     
@@ -74,5 +78,8 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     }
     public synchronized boolean isInstrumented() {
         return this.isInstrumented;
+    }
+    public synchronized boolean hasDefaultContructor() {
+        return this.hasDefaultContructor;
     }
 }
