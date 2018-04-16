@@ -14,10 +14,10 @@ import java.util.logging.Logger;
  */
 public class LogginProperties {
 
-    public static Level TransparentDirtyDetectorAdapter            = Level.INFO;
-    public static Level TransparentDirtyDetectorInstrumentator     = Level.INFO;
-    public static Level TransparentDirtyDetectorAgent              = Level.INFO;
-    public static Level InstrumentableClassDetector                = Level.INFO;
-    public static Level WriteAccessActivatorAdapter                = Level.INFO;
+    public static Level TransparentDirtyDetectorAdapter            = Level.FINEST;
+    public static Level TransparentDirtyDetectorInstrumentator     = Level.FINEST;
+    public static Level TransparentDirtyDetectorAgent              = Level.FINEST;
+    public static Level InstrumentableClassDetector                = Level.FINEST;
+    public static Level WriteAccessActivatorAdapter                = Level.FINEST;
     
 }

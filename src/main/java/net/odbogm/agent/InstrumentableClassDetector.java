@@ -5,13 +5,10 @@
  */
 package net.odbogm.agent;
 
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.odbogm.agent.LogginProperties;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -65,9 +62,9 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     @Override
     public synchronized MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv;
-        LOGGER.log(Level.FINEST, "visitando método: " + name + " signature: "+signature);
+        LOGGER.log(Level.FINEST, "visitando método: " + name + "desc: " + desc + " signature: "+signature);
         mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        if ((mv != null) && name.equals("<init>") && signature == null ) {
+        if ((mv != null) && name.equals("<init>") && desc == "()V" ) {
             hasDefaultContructor = true;
         }
         return mv;
