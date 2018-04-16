@@ -64,7 +64,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
         MethodVisitor mv;
         LOGGER.log(Level.FINEST, "visitando método: " + name + "desc: " + desc + " signature: "+signature);
         mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        if ((mv != null) && name.equals("<init>") && desc == "()V" ) {
+        if ((mv != null) && name.equals("<init>") && desc.equals("()V") ) {
             hasDefaultContructor = true;
         }
         return mv;

@@ -8,7 +8,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
-
+//apply plugin: 'com.github.johnrengelman.shadow'
 
 println "***************************************************************"
 println "SISTEMA: " + name
@@ -55,7 +55,7 @@ task autoBuildNumber {
                                 '.'+( versionParts.length==4 ? (versionParts[3].toInteger()+1).toString():"1")
                 
                 line = "version="+versionNumber
-//                println line
+                //                println line
             }
             printWriter.println(line)
         }
@@ -68,10 +68,10 @@ if (! project.gradle.startParameter.taskNames.join(",").toLowerCase().contains("
     build.dependsOn autoBuildNumber
 }
 build.doLast {
-        println "***************************************************************"
-        println "SISTEMA: " + name
-        println "VERSION: " + version
-        println "***************************************************************"
+    println "***************************************************************"
+    println "SISTEMA: " + name
+    println "VERSION: " + version
+    println "***************************************************************"
 }
 
 
@@ -86,14 +86,14 @@ build.doLast {
 javadoc.enabled = true
 
 repositories {
-//    maven {
-//        url "$sonatypeURLRelease"
-//            
-//        credentials {
-//            username = "$sonatypeUser"
-//            password = "$sonatypePassword"
-//        }
-//    }
+    //    maven {
+    //        url "$sonatypeURLRelease"
+    //            
+    //        credentials {
+    //            username = "$sonatypeUser"
+    //            password = "$sonatypePassword"
+    //        }
+    //    }
     mavenLocal()
     mavenCentral()
 }
@@ -106,10 +106,10 @@ dependencies {
     
     //compile("com.esotericsoftware:kryo-shaded:4.0.1")
     
-//    compile("com.orientechnologies:orientdb-graphdb:2.2.29")
+    //    compile("com.orientechnologies:orientdb-graphdb:2.2.29")
     
     // https://mvnrepository.com/artifact/org.objenesis/objenesis
-//    compile group: 'org.objenesis', name: 'objenesis', version: '2.6'
+    //    compile group: 'org.objenesis', name: 'objenesis', version: '2.6'
     
     compile "com.sun:tools:1.8.0"
     
@@ -189,11 +189,11 @@ artifacts {
 signing {
     //required { gradle.taskGraph.hasTask("uploadArchives")}
     
-//    ext."signing.keyId"= credentials.gpgKeyId
-//    ext."signing.password"= credentials.gpgKeyPassword
-//    ext."signing.secretKeyRingFile" = credentials.gpgKeyRingFile                
+    //    ext."signing.keyId"= credentials.gpgKeyId
+    //    ext."signing.password"= credentials.gpgKeyPassword
+    //    ext."signing.secretKeyRingFile" = credentials.gpgKeyRingFile                
 
-//    println ext."signing.keyId"
+    //    println ext."signing.keyId"
     
     sign(configurations.archives)
 }

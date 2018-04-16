@@ -153,6 +153,8 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
             mv.visitInsn(Opcodes.RETURN);
             mv.visitMaxs(1,1);
             mv.visitEnd();
+        } else {
+            LOGGER.log(Level.FINER, "Se ha encontrado el contructor por defecto. ");
         }
         
         if (LogginProperties.TransparentDirtyDetectorInstrumentator == Level.FINER) {
