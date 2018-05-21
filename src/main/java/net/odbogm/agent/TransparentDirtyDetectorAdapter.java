@@ -40,7 +40,9 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
         String[] addInterfaces = Arrays.copyOf(interfaces, interfaces.length + 1); //create new array from old array and allocate one more element
         addInterfaces[addInterfaces.length - 1] = ITransparentDirtyDetector.class.getName().replace(".", "/");
         LOGGER.log(Level.FINER, "visitando clase: " + name + " super: " + superName + " y agregando la interface.");
-        cv.visit(version, access, name, signature, superName, addInterfaces);
+        // se elimina la propiedad FINAL de todas las clases visitadas para que 
+        // CGLIB pueda extenderlas.
+        cv.visit(version, access & (~Opcodes.ACC_FINAL) , name, signature, superName, addInterfaces);
     }
 
     @Override

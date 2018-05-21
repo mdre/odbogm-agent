@@ -50,19 +50,23 @@ public class InstrumentableClassDetector extends ClassVisitor  {
 
     @Override
     public synchronized  AnnotationVisitor visitAnnotation(String ann, boolean bln) {
+        LOGGER.log(Level.FINEST, "//=====================================================");
+        LOGGER.log(Level.FINEST, "Annotations: ");
+        LOGGER.log(Level.FINEST, "//=====================================================");
         LOGGER.log(Level.FINEST, "Annotation: >"+ann+"<");
         if (ann.startsWith("Lnet/odbogm/annotations/Entity")) {
             LOGGER.log(Level.FINER, clazzName + ": Annotation: >"+ann+"<");
             LOGGER.log(Level.FINER, ">>>>>>>>>>> marcar como instrumentable");
             this.isInstrumetable = true;
         }
+        LOGGER.log(Level.FINEST, "//=====================================================");
         return super.visitAnnotation(ann, bln); 
     }
 
     @Override
     public synchronized MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv;
-        LOGGER.log(Level.FINEST, "visitando método: " + name + "desc: " + desc + " signature: "+signature);
+        LOGGER.log(Level.FINEST, "visitando método: " + name + " desc: " + desc + " signature: "+signature);
         mv = cv.visitMethod(access, name, desc, signature, exceptions);
         if ((mv != null) && name.equals("<init>") && desc.equals("()V") ) {
             hasDefaultContructor = true;

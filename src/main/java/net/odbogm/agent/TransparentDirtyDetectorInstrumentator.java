@@ -76,7 +76,7 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
         InstrumentableClassDetector icd = new InstrumentableClassDetector(cw);
         cr.accept(icd, 0);
 
-//        LOGGER.log(Level.FINER, "isInstrumentable: "+taa.isInstrumentable());
+        LOGGER.log(Level.FINEST, "isInstrumentable: "+icd.isInstrumentable());
         if (icd.isInstrumentable() && !icd.isInstrumented()) {
             LOGGER.log(Level.FINER, ""
                     + "\n****************************************************************************"
