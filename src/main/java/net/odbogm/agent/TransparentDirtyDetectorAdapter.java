@@ -42,6 +42,8 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
         LOGGER.log(Level.FINER, "visitando clase: " + name + " super: " + superName + " y agregando la interface.");
         // se elimina la propiedad FINAL de todas las clases visitadas para que 
         // CGLIB pueda extenderlas.
+        LOGGER.log(Level.FINEST, ((access & Opcodes.ACC_FINAL) > 0)?"Clase FINAL detectada":"");
+
         cv.visit(version, access & (~Opcodes.ACC_FINAL) , name, signature, superName, addInterfaces);
     }
 

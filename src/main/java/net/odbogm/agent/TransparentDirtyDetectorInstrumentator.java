@@ -61,7 +61,7 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
             ProtectionDomain protectionDomain, byte[] classfileBuffer)
             throws IllegalClassFormatException {
 
-        LOGGER.log(Level.FINEST, "analizando clase: {0}...", className);
+        LOGGER.log(Level.FINEST, "\n\nanalizando clase: {0}...", className);
 
 //        if (isInstrumentable(className)) {
         // forzar la recarga
@@ -84,37 +84,39 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
                     + "\n****************************************************************************", className);
             ClassReader crRedefine = new ClassReader(classfileBuffer);
 
-            cw = new ClassWriter(crRedefine, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) {
-                // Asegurar que se usa el mismo CL para cargar las clases.
-                @Override
-                protected String getCommonSuperClass(String type1, String type2) {
-                    LOGGER.log(Level.INFO, "type1: " + type1 + "   - type2: " + type2);
-                    Class<?> c, d;
-                    try {
-                        c = Class.forName(type1.replace('/', '.'), false, loader);
-                        d = Class.forName(type2.replace('/', '.'), false, loader);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e.toString());
-                    }
-                    if (c.isAssignableFrom(d)) {
-                        return type1;
-                    }
-                    if (d.isAssignableFrom(c)) {
-                        return type2;
-                    }
-                    if (c.isInterface() || d.isInterface()) {
-                        return "java/lang/Object";
-                    } else {
-                        do {
-                            c = c.getSuperclass();
-                        } while (!c.isAssignableFrom(d));
-                        return c.getName().replace('.', '/');
-                    }
+            cw = new ClassWriter(crRedefine, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) 
+                {
+                    // Asegurar que se usa el mismo CL para cargar las clases.
+                    @Override
+                    protected String getCommonSuperClass(String type1, String type2) {
+                        LOGGER.log(Level.INFO, "type1: " + type1 + "   - type2: " + type2);
+                        Class<?> c, d;
+                        try {
+                            c = Class.forName(type1.replace('/', '.'), false, loader);
+                            d = Class.forName(type2.replace('/', '.'), false, loader);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e.toString());
+                        }
+                        if (c.isAssignableFrom(d)) {
+                            return type1;
+                        }
+                        if (d.isAssignableFrom(c)) {
+                            return type2;
+                        }
+                        if (c.isInterface() || d.isInterface()) {
+                            return "java/lang/Object";
+                        } else {
+                            do {
+                                c = c.getSuperclass();
+                            } while (!c.isAssignableFrom(d));
+                            return c.getName().replace('.', '/');
+                        }
 
-//                return super.getCommonSuperClass(type1, type2);
+    //                return super.getCommonSuperClass(type1, type2);
+                }
+
             }
-                
-        };
+                    ;
         TransparentDirtyDetectorAdapter taa = new TransparentDirtyDetectorAdapter(cw);
         try {
             crRedefine.accept(taa, ClassReader.EXPAND_FRAMES);
