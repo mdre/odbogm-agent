@@ -7,7 +7,6 @@ package net.odbogm.agent;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.odbogm.agent.LogginProperties;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -31,6 +30,10 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
         super(Opcodes.ASM6, mv);
     }
 
+    /**
+     * Add a call to setDirty in every method that has a PUTFIELD in it code.
+     * @param opcode código a analizar
+     */
     @Override
     public synchronized void visitInsn(int opcode) {
         LOGGER.log(Level.FINEST, "Activate: "+this.activate);
