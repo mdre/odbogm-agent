@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.odbogm.agent;
 
 import java.io.File;
@@ -22,24 +17,20 @@ import org.objectweb.asm.Opcodes;
  *
  * @author Marcelo D. Ré {@literal <marcelo.re@gmail.com>}
  */
-public class TransparentDirtyDetectorInstrumentator implements ClassFileTransformer, ITransparentDirtyDetectorDef {
+public class TransparentDirtyDetectorInstrumentator
+        implements ClassFileTransformer, ITransparentDirtyDetectorDef {
 
     private final static Logger LOGGER = Logger.getLogger(TransparentDirtyDetectorInstrumentator.class.getName());
-
     static {
         if (LOGGER.getLevel() == null) {
             LOGGER.setLevel(LogginProperties.TransparentDirtyDetectorInstrumentator);
         } else {
-
             System.out.println("TDDI: " + LOGGER.getLevel());
         }
     }
-//    public TransparentDirtyDetectorInstrumentator() {
-//        this.pkgs = TransparentDirtyDetectorAgent.pkgs;
-//    }
 
     /**
-     * Instrumentador
+     * Instrumentador.
      */
     public TransparentDirtyDetectorInstrumentator() {
     }
@@ -65,9 +56,6 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
 
         LOGGER.log(Level.FINEST, "\n\nanalizando clase: {0}...", className);
 
-//        if (isInstrumentable(className)) {
-        // forzar la recarga
-//            clazz.getName().replace(".", "/")
         ClassReader cr = new ClassReader(classfileBuffer);
         if (isInterface(cr)) {
             // No procesar las interfaces
@@ -83,7 +71,8 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
             LOGGER.log(Level.FINER, ""
                     + "\n****************************************************************************"
                     + "\nRedefiniendo on-the-fly {0}..."
-                    + "\n****************************************************************************", className);
+                    + "\n****************************************************************************",
+                    className);
             ClassReader crRedefine = new ClassReader(classfileBuffer);
 
             cw = new ClassWriter(crRedefine, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) {
@@ -112,10 +101,7 @@ public class TransparentDirtyDetectorInstrumentator implements ClassFileTransfor
                         } while (!c.isAssignableFrom(d));
                         return c.getName().replace('.', '/');
                     }
-
-                    //                return super.getCommonSuperClass(type1, type2);
                 }
-
             };
             TransparentDirtyDetectorAdapter taa = new TransparentDirtyDetectorAdapter(cw);
             try {

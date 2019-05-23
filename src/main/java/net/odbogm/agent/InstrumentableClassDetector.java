@@ -25,7 +25,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
         }
     }
     
-    private boolean isInstrumetable = false;
+    private boolean isInstrumentable = false;
     private boolean isInstrumented = false;
     private boolean hasDefaultContructor = false;
     private String clazzName = null;
@@ -57,7 +57,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
         if (ann.startsWith("Lnet/odbogm/annotations/Entity")) {
             LOGGER.log(Level.FINER, clazzName + ": Annotation: >"+ann+"<");
             LOGGER.log(Level.FINER, ">>>>>>>>>>> marcar como instrumentable");
-            this.isInstrumetable = true;
+            this.isInstrumentable = true;
         }
         LOGGER.log(Level.FINEST, "//=====================================================");
         return super.visitAnnotation(ann, bln); 
@@ -75,7 +75,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     }
     
     public synchronized boolean isInstrumentable() {
-        return this.isInstrumetable;
+        return this.isInstrumentable;
     }
     public synchronized boolean isInstrumented() {
         return this.isInstrumented;
