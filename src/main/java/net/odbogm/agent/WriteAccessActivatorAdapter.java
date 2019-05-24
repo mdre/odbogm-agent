@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.odbogm.agent;
 
 import java.util.logging.Level;
@@ -31,18 +26,18 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
     }
 
     /**
-     * Add a call to setDirty in every method that has a PUTFIELD in it code.
+     * Add a call to setDirty in every method that has a PUTFIELD in its code.
      * @param opcode código a analizar
      */
     @Override
     public synchronized void visitInsn(int opcode) {
-        LOGGER.log(Level.FINEST, "Activate: "+this.activate);
+        LOGGER.log(Level.FINEST, "Activate: {0}", this.activate);
         if ((this.activate)&&((opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) || opcode == Opcodes.ATHROW)) {
             LOGGER.log(Level.FINEST, "Agregando llamada a setDirty...");
             mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitInsn(Opcodes.ICONST_1);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, SETDIRTY, "(Z)V", false);
-//            mv.visitFieldInsn(Opcodes.PUTFIELD, owner, "__ogm__dirtyMark", "Z");
+            //mv.visitFieldInsn(Opcodes.PUTFIELD, owner, "__ogm__dirtyMark", "Z");
         } 
         mv.visitInsn(opcode);
         LOGGER.log(Level.FINEST, "fin --------------------------------------------------");
@@ -50,7 +45,7 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
 
     @Override
     public synchronized void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        LOGGER.log(Level.FINEST, "owner: "+owner+" - name: "+name+" - desc: "+desc);
+        LOGGER.log(Level.FINEST, "owner: {0} - name: {1} - desc: {2}", new Object[]{owner, name, desc});
         if (opcode == Opcodes.PUTFIELD) {
             this.activate = true;
             this.owner = owner;
@@ -62,7 +57,7 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
     @Override
     public void visitEnd() {
         LOGGER.log(Level.FINEST, "fin MethodVisitor -------------------------------------");
-        super.visitEnd(); //To change body of generated methods, choose Tools | Templates.
+        super.visitEnd();
     }
     
 }

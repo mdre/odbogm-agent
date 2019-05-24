@@ -158,19 +158,19 @@ public class TransparentDirtyDetectorTest {
     }
     
     
-//    @Test
-//    public void finalMethods() throws Exception {
-//        Outer outer = new Outer("test");
-//        assertTrue(outer instanceof ITransparentDirtyDetector);
-//        assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
-//        
-//        outer.finalMethod();
-//        assertEquals("final", outer.getMember());
-//        assertTrue(((ITransparentDirtyDetector)outer).___ogm___isDirty());
-//        
-//        Method m = outer.getClass().getDeclaredMethod("finalMethod");
-//        assertNotNull(m);
-//        assertFalse(Modifier.isFinal(m.getModifiers()));
-//    }
+    @Test
+    public void finalMethods() throws Exception {
+        Outer outer = new Outer("test");
+        assertTrue(outer instanceof ITransparentDirtyDetector);
+        assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
+        
+        outer.finalMethod();
+        assertEquals("final", outer.getMember());
+        assertTrue(((ITransparentDirtyDetector)outer).___ogm___isDirty());
+        
+        Method m = outer.getClass().getDeclaredMethod("finalMethod");
+        assertNotNull(m);
+        assertFalse(Modifier.isFinal(m.getModifiers()));
+    }
     
 }
