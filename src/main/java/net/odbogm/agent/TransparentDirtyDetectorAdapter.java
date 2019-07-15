@@ -1,15 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.odbogm.agent;
 
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.odbogm.agent.LogginProperties;
-import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -29,17 +22,18 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     }
     
     private boolean isFieldPresent = false;
-//    private boolean isInstrumetable = false;
 
     public TransparentDirtyDetectorAdapter(ClassVisitor cv) {
-        super(Opcodes.ASM6, cv);
+        super(Opcodes.ASM7, cv);
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public void visit(int version, int access, String name, String signature,
+            String superName, String[] interfaces) {
         String[] addInterfaces = Arrays.copyOf(interfaces, interfaces.length + 1); //create new array from old array and allocate one more element
         addInterfaces[addInterfaces.length - 1] = ITransparentDirtyDetector.class.getName().replace(".", "/");
-        LOGGER.log(Level.FINER, "visitando clase: " + name + " super: " + superName + " y agregando la interface.");
+        LOGGER.log(Level.FINER, "visitando clase: {0} super: {1} y agregando la interface.",
+                new Object[]{name, superName});
         // se elimina la propiedad FINAL de todas las clases visitadas para que 
         // CGLIB pueda extenderlas.
         LOGGER.log(Level.FINEST, ((access & Opcodes.ACC_FINAL) > 0)?"Clase FINAL detectada":"");
@@ -59,10 +53,11 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv;
-        LOGGER.log(Level.FINEST, "visitando método: " + name + " signature: "+signature);
-        mv = cv.visitMethod(access, name, desc, signature, exceptions);
-        if ((mv != null) && !name.equals("<init>") && !name.equals("<clinit>") ) {
-            LOGGER.log(Level.FINER, ">>>>>>>>>>> Instrumentando método: " + name);
+        LOGGER.log(Level.FINEST, "visitando método: {0} signature: {1}", new Object[]{name, signature});
+        //se quitan todos los FINAL de los métodos
+        mv = cv.visitMethod(access & (~Opcodes.ACC_FINAL), name, desc, signature, exceptions);
+        if ((mv != null) && !name.equals("<init>") && !name.equals("<clinit>")) {
+            LOGGER.log(Level.FINER, ">>>>>>>>>>> Instrumentando método: {0}", name);
             mv = new WriteAccessActivatorAdapter(mv);
             LOGGER.log(Level.FINEST, "fin instrumentación ---------------------------------------------------");
         } else {
@@ -75,7 +70,8 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     public void visitEnd() {
         if (!isFieldPresent) {
             LOGGER.log(Level.FINER, "Agregando el campo");
-            FieldVisitor fv = cv.visitField(Opcodes.ACC_PUBLIC, DIRTYMARK, org.objectweb.asm.Type.BOOLEAN_TYPE.getDescriptor(), null, null);
+            FieldVisitor fv = cv.visitField(Opcodes.ACC_PUBLIC, DIRTYMARK,
+                    org.objectweb.asm.Type.BOOLEAN_TYPE.getDescriptor(), null, null);
             if (fv != null) {
                 fv.visitEnd();
                 LOGGER.log(Level.FINER, "fv.visitEnd..");
