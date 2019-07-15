@@ -9,20 +9,24 @@ import org.objectweb.asm.Opcodes;
  *
  * @author Marcelo D. Ré {@literal <marcelo.re@gmail.com>}
  */
-public class WriteAccessActivatorAdapter extends MethodVisitor implements ITransparentDirtyDetectorDef {
+public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor implements ITransparentDirtyDetectorDef {
 
-    private final static Logger LOGGER = Logger.getLogger(WriteAccessActivatorAdapter.class.getName());
-    private boolean activate = false;
-    private String owner;
-
+    private final static Logger LOGGER = Logger.getLogger(WriteAccessActivatorInnerClassAdapter.class.getName());
     static {
         if (LOGGER.getLevel() == null) {
-            LOGGER.setLevel(LogginProperties.WriteAccessActivatorAdapter);
+            LOGGER.setLevel(LogginProperties.WriteAccessActivatorInnerClassAdapter);
         }
     }
     
-    public WriteAccessActivatorAdapter(MethodVisitor mv) {
+    private boolean activate = false;
+    private String owner;
+    private String className;
+    private String outerClass;
+    
+    public WriteAccessActivatorInnerClassAdapter(MethodVisitor mv, String cn) {
         super(Opcodes.ASM7, mv);
+        this.className = cn;
+        outerClass = className.substring(0, className.lastIndexOf("$"));
     }
 
     /**
@@ -31,10 +35,15 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
      */
     @Override
     public synchronized void visitInsn(int opcode) {
-        LOGGER.log(Level.FINEST, "Activate: {0}", this.activate);
+        LOGGER.log(Level.FINER, "Activate: {0}", this.activate);
         if ((this.activate)&&((opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) || opcode == Opcodes.ATHROW)) {
-            LOGGER.log(Level.FINEST, "Agregando llamada a setDirty...");
+            LOGGER.log(Level.FINER, "Agregando llamada a setDirty...");
             mv.visitVarInsn(Opcodes.ALOAD, 0);
+            //getfield test/OuterTarget$1.this$0:test.OuterTarget
+            
+            LOGGER.log(Level.FINER, "className: {0}, outerClass: {1}", new String[]{className,outerClass});
+            mv.visitFieldInsn(Opcodes.GETFIELD, this.className,"this$0","L"+this.outerClass+";");
+            
             mv.visitInsn(Opcodes.ICONST_1);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, SETDIRTY, "(Z)V", false);
             //mv.visitFieldInsn(Opcodes.PUTFIELD, owner, "__ogm__dirtyMark", "Z");
@@ -45,7 +54,9 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
 
     @Override
     public synchronized void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        LOGGER.log(Level.FINEST, "owner: {0} - name: {1} - desc: {2}", new Object[]{owner, name, desc});
+        LOGGER.log(Level.FINER, "owner: {0} - name: {1} - desc: {2} - opcode: {3}", new Object[]{owner, name, desc, opcode});
+        //  owner: test/Outer$1 - name: this$0 - desc: Ltest/Outer;
+
         if (opcode == Opcodes.PUTFIELD) {
             this.activate = true;
             this.owner = owner;

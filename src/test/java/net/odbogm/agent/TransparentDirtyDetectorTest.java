@@ -1,13 +1,19 @@
 package net.odbogm.agent;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import test.ColClass;
 import test.ExAbsClass;
 import test.FinalClass;
@@ -20,6 +26,7 @@ import test.Outer;
 public class TransparentDirtyDetectorTest {
     
     public TransparentDirtyDetectorTest() {
+        
     }
     
     @BeforeClass
@@ -33,7 +40,17 @@ public class TransparentDirtyDetectorTest {
     
     @Before
     public void setUp() {
-        TransparentDirtyDetectorAgent.initialize();
+        try {
+            TransparentDirtyDetectorAgent.initialize();
+        } catch (AttachNotSupportedException ex) {
+            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (AgentLoadException ex) {
+            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (AgentInitializationException ex) {
+            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     @After
@@ -46,7 +63,9 @@ public class TransparentDirtyDetectorTest {
      */
     @Test
     public void testObjects() {
-        System.out.println("testeando los objetos");
+        System.out.println("");
+        System.out.println("testObjects() ---------------------------------------------------");
+        System.out.println("");
         
         ExAbsClass eac = new ExAbsClass();
         assertTrue(eac instanceof ITransparentDirtyDetector);
@@ -70,6 +89,10 @@ public class TransparentDirtyDetectorTest {
     
     @Test
     public void innerClass() throws Exception {
+        System.out.println("");
+        System.out.println("innerClass() ---------------------------------------------------");
+        System.out.println("");
+        
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
@@ -85,18 +108,30 @@ public class TransparentDirtyDetectorTest {
     
     @Test
     public void anonClass() throws Exception {
+        System.out.println("");
+        System.out.println("anonClass() ---------------------------------------------------");
+        System.out.println("");
+        
+        System.out.println("1");
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
         
+        System.out.println("2");
         outer.anon();
         assertEquals("run", outer.getMember());
         assertTrue(((ITransparentDirtyDetector)outer).___ogm___isDirty());
+        
+        System.out.println("fin anonClass() ---------------------------------------------------");
     }
     
     
     @Test
     public void lambda() throws Exception {
+        System.out.println("");
+        System.out.println("lambda() ---------------------------------------------------");
+        System.out.println("");
+        
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
@@ -107,8 +142,12 @@ public class TransparentDirtyDetectorTest {
     }
     
     
-    @Test
+   @Test
     public void lambda2() throws Exception {
+        System.out.println("");
+        System.out.println("lambda2() ---------------------------------------------------");
+        System.out.println("");
+        
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
@@ -121,6 +160,10 @@ public class TransparentDirtyDetectorTest {
     
     @Test
     public void otherThread() throws Exception {
+        System.out.println("");
+        System.out.println("ohterThread() ---------------------------------------------------");
+        System.out.println("");
+        
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
@@ -133,6 +176,10 @@ public class TransparentDirtyDetectorTest {
     
     @Test
     public void publicMembers() throws Exception {
+        System.out.println("");
+        System.out.println("publicMember() ---------------------------------------------------");
+        System.out.println("");
+        
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
@@ -146,6 +193,10 @@ public class TransparentDirtyDetectorTest {
     
     @Test
     public void finalClass() throws Exception {
+        System.out.println("");
+        System.out.println("finalClass() ---------------------------------------------------");
+        System.out.println("");
+        
         FinalClass fc = new FinalClass();
         Object fco = (Object)fc;
         assertTrue(fco instanceof ITransparentDirtyDetector);
@@ -160,6 +211,10 @@ public class TransparentDirtyDetectorTest {
     
     @Test
     public void finalMethods() throws Exception {
+        System.out.println("");
+        System.out.println("finalMethods() ---------------------------------------------------");
+        System.out.println("");
+        
         Outer outer = new Outer("test");
         assertTrue(outer instanceof ITransparentDirtyDetector);
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());

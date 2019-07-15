@@ -3,23 +3,49 @@ plugins {
     id 'maven'
     id 'signing'
     id 'net.researchgate.release' version '2.6.0'
-    id 'nu.studer.credentials' version '1.0.0'
+    id 'nu.studer.credentials' version '1.0.7'
     id 'io.codearte.nexus-staging' version '0.11.0'
 }
 
-
-dependencies {
-    compile 'org.ow2.asm:asm:6.0'
-    compile 'com.ea.agentloader:ea-agent-loader:1.0.3'
-    testImplementation 'junit:junit:[4,)'
+// ejecutar: gradle idea 
+// para que inicialize el proyecto y baje los javadocs.
+apply plugin: 'idea'
+idea{
+    module{
+        downloadJavadoc=true
+    }
 }
 
 
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    
 }
 
+
+dependencies {
+    compile 'org.ow2.asm:asm:7.1'
+    compile group: 'org.ow2.asm', name: 'asm-util', version: '7.1'
+    testImplementation 'junit:junit:[4,)'
+}
+
+
+repositories {
+    //    maven {
+    //        url "$sonatypeURLRelease"
+    //            
+    //        credentials {
+    //            username = "$sonatypeUser"
+    //            password = "$sonatypePassword"
+    //        }
+    //    }
+    mavenLocal()
+    mavenCentral()
+}
+
+// desactivo la generación de javadoc en los proyectos que tengan la tarea
+javadoc.enabled = true
 
 println "***************************************************************"
 println "SISTEMA: " + name
@@ -95,24 +121,11 @@ build.doLast {
 //    }
 //}
 
-// desactivo la generación de javadoc en los proyectos que tengan la tarea
-javadoc.enabled = true
 
-repositories {
-    //    maven {
-    //        url "$sonatypeURLRelease"
-    //            
-    //        credentials {
-    //            username = "$sonatypeUser"
-    //            password = "$sonatypePassword"
-    //        }
-    //    }
-    mavenLocal()
-    mavenCentral()
-}
 
 
 test {
+    jvmArgs '-Djdk.attach.allowAttachSelf=true'
     testLogging {
         // Make sure output from
         // standard out or error is shown

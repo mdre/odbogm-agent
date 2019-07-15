@@ -24,7 +24,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     private boolean isFieldPresent = false;
 
     public TransparentDirtyDetectorAdapter(ClassVisitor cv) {
-        super(Opcodes.ASM6, cv);
+        super(Opcodes.ASM7, cv);
     }
 
     @Override
@@ -51,8 +51,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String desc,
-            String signature, String[] exceptions) {
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv;
         LOGGER.log(Level.FINEST, "visitando método: {0} signature: {1}", new Object[]{name, signature});
         //se quitan todos los FINAL de los métodos

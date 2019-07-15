@@ -5,6 +5,8 @@
  */
 package net.odbogm.agent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.AnnotationVisitor;
@@ -28,10 +30,11 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     private boolean isInstrumentable = false;
     private boolean isInstrumented = false;
     private boolean hasDefaultContructor = false;
+    private List<String> innerClasses = new ArrayList<>();
     private String clazzName = null;
     
     public InstrumentableClassDetector(ClassVisitor cv) {
-        super(Opcodes.ASM4, cv);
+        super(Opcodes.ASM7, cv);
     }
 
     @Override
@@ -59,6 +62,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
             LOGGER.log(Level.FINER, ">>>>>>>>>>> marcar como instrumentable");
             this.isInstrumentable = true;
         }
+        
         LOGGER.log(Level.FINEST, "//=====================================================");
         return super.visitAnnotation(ann, bln); 
     }
@@ -73,7 +77,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
         }
         return mv;
     }
-    
+
     public synchronized boolean isInstrumentable() {
         return this.isInstrumentable;
     }
