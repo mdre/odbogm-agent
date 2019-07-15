@@ -100,9 +100,12 @@ task autoBuildNumber {
         printWriter.close()
     }
 }
+task skipabn {}
 
 // agregar la dependencia solo si no se trata de un release
-if (! project.gradle.startParameter.taskNames.join(",").toLowerCase().contains("release") ) {
+if (! (project.gradle.startParameter.taskNames.join(",").toLowerCase().contains("release") || 
+       project.gradle.startParameter.taskNames.join(",").toLowerCase().contains("skipabn") 
+        ) ) {
     build.dependsOn autoBuildNumber
 }
 build.doLast {
