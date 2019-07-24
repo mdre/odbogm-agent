@@ -83,7 +83,7 @@ public class TransparentDirtyDetectorAgent {
      * Programmatic hook to dynamically load javaagent at runtime. It could be load with JVM parameters. Ej:
      * -javaagent:/path-to-glassfish/domains/domain1/lib/ext/odbogm-agent-x.x.x.jar
      */
-    public static void initialize() throws AttachNotSupportedException, IOException, AgentLoadException, AgentInitializationException {
+    public static void initialize() throws OdbogmAgentInitializationException {
         if (instrumentation == null) {
             try {
                 LOGGER.log(Level.INFO, "Dynamically loading java agent...");
@@ -96,10 +96,11 @@ public class TransparentDirtyDetectorAgent {
                     loadAgentClass(TransparentDirtyDetectorAgent.class.getName(),
                             null, null, true, true, true);
                 }
-            } catch (URISyntaxException ex) {
+            } catch (URISyntaxException | AttachNotSupportedException | IOException |
+                    AgentLoadException | AgentInitializationException ex) {
                 Logger.getLogger(TransparentDirtyDetectorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                throw new OdbogmAgentInitializationException(ex);
             }
-
         }
     }
 

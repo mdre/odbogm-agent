@@ -42,13 +42,7 @@ public class TransparentDirtyDetectorTest {
     public void setUp() {
         try {
             TransparentDirtyDetectorAgent.initialize();
-        } catch (AttachNotSupportedException ex) {
-            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (AgentLoadException ex) {
-            Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (AgentInitializationException ex) {
+        } catch (OdbogmAgentInitializationException ex) {
             Logger.getLogger(TransparentDirtyDetectorTest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
