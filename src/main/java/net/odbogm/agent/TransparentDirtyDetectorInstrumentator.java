@@ -8,7 +8,6 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.odbogm.annotations.Entity;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -169,12 +168,16 @@ public class TransparentDirtyDetectorInstrumentator
             }
         } else {
             // si contiene el $, significa que es una innerClass. 
-            // debermos revisar si corresponde intrumentarla visitando la clase principal y
-            // verificando que tenga el annotation @Entity
+            // debermos revisar si corresponde intrumentarla visitando la clase principal
             String outerClass = className.substring(0, className.lastIndexOf("$")).replace("/", ".");
+            
             try {
                 LOGGER.log(Level.FINER, "analizando innerClass: " + className);
-                if (Class.forName(outerClass).getAnnotation(Entity.class) != null) {
+                ClassReader ocr = new ClassReader(outerClass);
+                ClassWriter ocw = new ClassWriter(ocr, 0);
+                InstrumentableClassDetector oicd = new InstrumentableClassDetector(ocw);
+                ocr.accept(oicd, 0);
+                if (oicd.isInstrumentable() && !oicd.isInstrumented()) {
                     LOGGER.log(Level.FINER, "Se encontró la anotattion Entity en la clase contenedora. Instrumentar la innerClass");
 
                     // FIXME: esto debería sacarse a una clase aparte o a un método, para que quede mas prolijo. 
@@ -215,7 +218,6 @@ public class TransparentDirtyDetectorInstrumentator
                     };
                     
                     // activar el chequeo de la clase
-//                    TransparentDirtyDetectorInnerClassAdapter taa = new TransparentDirtyDetectorInnerClassAdapter(new CheckClassAdapter(cw,true), className);
                     TransparentDirtyDetectorInnerClassAdapter taa = new TransparentDirtyDetectorInnerClassAdapter(new CheckClassAdapter(cw,true), className);
                     try {
                         crRedefine.accept(taa, ClassReader.EXPAND_FRAMES);
@@ -245,7 +247,7 @@ public class TransparentDirtyDetectorInstrumentator
                     return cw.toByteArray();
 
                 }
-            } catch (ClassNotFoundException ex) {
+            } catch (IOException ex) {
                 LOGGER.log(Level.FINER, "No se ha podido analizar la clase inner "+className);
             }
         }

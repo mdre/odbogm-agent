@@ -57,6 +57,9 @@ public class Outer {
     
 
     public class Inner {
+        private boolean touched = false;
+        public void touch() { this.touched = true; }
+        public boolean isTouched() { return touched; }
         public void setOuterMember(String member) {
             Outer.this.member = member;
         }

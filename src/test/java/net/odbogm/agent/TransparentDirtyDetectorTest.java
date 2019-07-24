@@ -98,6 +98,11 @@ public class TransparentDirtyDetectorTest {
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
         
         Outer.Inner inner = outer.new Inner();
+        assertFalse(inner instanceof ITransparentDirtyDetector);
+        assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
+        
+        inner.touch();
+        assertTrue(inner.isTouched());
         assertFalse(((ITransparentDirtyDetector)outer).___ogm___isDirty());
         
         inner.setOuterMember("modified");

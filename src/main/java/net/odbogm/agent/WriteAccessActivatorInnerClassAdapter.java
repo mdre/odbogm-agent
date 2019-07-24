@@ -9,7 +9,8 @@ import org.objectweb.asm.Opcodes;
  *
  * @author Marcelo D. Ré {@literal <marcelo.re@gmail.com>}
  */
-public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor implements ITransparentDirtyDetectorDef {
+public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor
+        implements ITransparentDirtyDetectorDef {
 
     private final static Logger LOGGER = Logger.getLogger(WriteAccessActivatorInnerClassAdapter.class.getName());
     static {
@@ -19,14 +20,13 @@ public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor impleme
     }
     
     private boolean activate = false;
-    private String owner;
     private String className;
     private String outerClass;
     
     public WriteAccessActivatorInnerClassAdapter(MethodVisitor mv, String cn) {
         super(Opcodes.ASM7, mv);
         this.className = cn;
-        outerClass = className.substring(0, className.lastIndexOf("$"));
+        this.outerClass = className.substring(0, className.lastIndexOf("$"));
     }
 
     /**
@@ -45,9 +45,9 @@ public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor impleme
             mv.visitFieldInsn(Opcodes.GETFIELD, this.className,"this$0","L"+this.outerClass+";");
             
             mv.visitInsn(Opcodes.ICONST_1);
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, SETDIRTY, "(Z)V", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, outerClass, SETDIRTY, "(Z)V", false);
             //mv.visitFieldInsn(Opcodes.PUTFIELD, owner, "__ogm__dirtyMark", "Z");
-        } 
+        }
         mv.visitInsn(opcode);
         LOGGER.log(Level.FINEST, "fin --------------------------------------------------");
     }
@@ -57,11 +57,10 @@ public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor impleme
         LOGGER.log(Level.FINER, "owner: {0} - name: {1} - desc: {2} - opcode: {3}", new Object[]{owner, name, desc, opcode});
         //  owner: test/Outer$1 - name: this$0 - desc: Ltest/Outer;
 
-        if (opcode == Opcodes.PUTFIELD) {
+        if (opcode == Opcodes.PUTFIELD && outerClass.equals(owner)) {
             this.activate = true;
-            this.owner = owner;
-        } 
-        mv.visitFieldInsn(opcode, owner, name, desc); 
+        }
+        mv.visitFieldInsn(opcode, owner, name, desc);
         LOGGER.log(Level.FINEST, "fin --------------------------------------------------");
     }
 
