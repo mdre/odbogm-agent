@@ -24,6 +24,7 @@ public class ExAbsClass extends AbstractClass {
     }
 
     private String s;
+    private transient int iTransient;
     
     public ExAbsClass() {
         
@@ -37,5 +38,14 @@ public class ExAbsClass extends AbstractClass {
         this.s = s;
     }
     
-    
+    public void setTransient() {
+        iTransient = 1;
+    }
+
+    public void shouldBeDirty() {
+        // esto no dería cambiar el estado
+        this.iTransient = 1;
+        // pero esto sí
+        this.s = "trash";
+    }
 }

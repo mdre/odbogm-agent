@@ -1,5 +1,6 @@
 package net.odbogm.agent;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.ClassVisitor;
@@ -23,10 +24,12 @@ public class TransparentDirtyDetectorInnerClassAdapter extends ClassVisitor impl
     
     private boolean isFieldPresent = false;
     private String className;
+    private List<String> ignoredFields;
     
-    public TransparentDirtyDetectorInnerClassAdapter(ClassVisitor cv, String cn) {
-        super(Opcodes.ASM7, cv);
+    public TransparentDirtyDetectorInnerClassAdapter(ClassVisitor cv, String cn, List<String> ignoredFields) {
+        super(Opcodes.ASM9, cv);
         this.className = cn;
+        this.ignoredFields = ignoredFields;
     }
 
 //    @Override
@@ -60,7 +63,7 @@ public class TransparentDirtyDetectorInnerClassAdapter extends ClassVisitor impl
         mv = cv.visitMethod(access & (~Opcodes.ACC_FINAL), name, desc, signature, exceptions);
         if ((mv != null) && !name.equals("<init>") && !name.equals("<clinit>")) {
             LOGGER.log(Level.FINER, ">>>>>>>>>>> Instrumentando método: {0}", name);
-            mv = new WriteAccessActivatorInnerClassAdapter(mv, className);
+            mv = new WriteAccessActivatorInnerClassAdapter(mv, className, ignoredFields);
             LOGGER.log(Level.FINEST, "fin instrumentación ---------------------------------------------------");
         } else {
             LOGGER.log(Level.FINEST, "mv = NULL !!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");

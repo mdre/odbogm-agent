@@ -1,6 +1,8 @@
 package net.odbogm.agent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.ClassVisitor;
@@ -22,9 +24,11 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
     }
     
     private boolean isFieldPresent = false;
+    private List<String> ignoredFields = new ArrayList();
 
-    public TransparentDirtyDetectorAdapter(ClassVisitor cv) {
-        super(Opcodes.ASM7, cv);
+    public TransparentDirtyDetectorAdapter(ClassVisitor cv, List<String> ignoredFields) {
+        super(Opcodes.ASM9, cv);
+        this.ignoredFields = ignoredFields;
     }
 
     @Override
@@ -47,6 +51,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
             isFieldPresent = true;
             LOGGER.log(Level.FINER, "El campo ya existe!!!! WARNING!!! Esto no deberia ocurrir!!! ************************");
         }
+        
         return cv.visitField(access, name, desc, signature, value);
     }
 
@@ -58,7 +63,7 @@ public class TransparentDirtyDetectorAdapter extends ClassVisitor implements ITr
         mv = cv.visitMethod(access & (~Opcodes.ACC_FINAL), name, desc, signature, exceptions);
         if ((mv != null) && !name.equals("<init>") && !name.equals("<clinit>")) {
             LOGGER.log(Level.FINER, ">>>>>>>>>>> Instrumentando método: {0}", name);
-            mv = new WriteAccessActivatorAdapter(mv);
+            mv = new WriteAccessActivatorAdapter(mv, ignoredFields);
             LOGGER.log(Level.FINEST, "fin instrumentación ---------------------------------------------------");
         } else {
             LOGGER.log(Level.FINEST, "mv = NULL !!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");

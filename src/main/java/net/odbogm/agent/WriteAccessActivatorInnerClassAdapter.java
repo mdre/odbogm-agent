@@ -1,5 +1,6 @@
 package net.odbogm.agent;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.MethodVisitor;
@@ -22,10 +23,12 @@ public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor
     private boolean activate = false;
     private String className;
     private String outerClass;
-    
-    public WriteAccessActivatorInnerClassAdapter(MethodVisitor mv, String cn) {
+    private List<String> ignoredFields;
+
+    public WriteAccessActivatorInnerClassAdapter(MethodVisitor mv, String cn, List<String> ignoredFields) {
         super(Opcodes.ASM7, mv);
         this.className = cn;
+        this.ignoredFields = ignoredFields;
         this.outerClass = className.substring(0, className.lastIndexOf("$"));
     }
 
@@ -57,7 +60,7 @@ public class WriteAccessActivatorInnerClassAdapter extends MethodVisitor
         LOGGER.log(Level.FINER, "owner: {0} - name: {1} - desc: {2} - opcode: {3}", new Object[]{owner, name, desc, opcode});
         //  owner: test/Outer$1 - name: this$0 - desc: Ltest/Outer;
 
-        if (opcode == Opcodes.PUTFIELD && outerClass.equals(owner)) {
+        if (opcode == Opcodes.PUTFIELD && outerClass.equals(owner) && !ignoredFields.contains(name)) {
             this.activate = true;
         }
         mv.visitFieldInsn(opcode, owner, name, desc);

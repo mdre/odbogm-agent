@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -31,6 +32,7 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     private boolean isInstrumented = false;
     private boolean hasDefaultContructor = false;
     private List<String> innerClasses = new ArrayList<>();
+    private List<String> ignoredFields = new ArrayList();
     private String clazzName = null;
     
     public InstrumentableClassDetector(ClassVisitor cv) {
@@ -68,6 +70,15 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     }
 
     @Override
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        // TODO Auto-generated method stub
+        if (this.isInstrumentable && (access & Opcodes.ACC_TRANSIENT)!= 0) {
+            this.ignoredFields.add(name);
+        }
+        return super.visitField(access, name, descriptor, signature, value);
+    }
+
+    @Override
     public synchronized MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv;
         LOGGER.log(Level.FINEST, "visitando método: " + name + " desc: " + desc + " signature: "+signature);
@@ -86,5 +97,9 @@ public class InstrumentableClassDetector extends ClassVisitor  {
     }
     public synchronized boolean hasDefaultContructor() {
         return this.hasDefaultContructor;
+    }
+
+    public List<String> getIgnoredFields() {
+        return this.ignoredFields;
     }
 }

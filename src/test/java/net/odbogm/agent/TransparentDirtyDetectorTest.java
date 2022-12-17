@@ -80,6 +80,26 @@ public class TransparentDirtyDetectorTest {
         assertTrue((Object)fc instanceof ITransparentDirtyDetector);
     }
     
+    @Test
+    public void transientFieldTest() throws Exception {
+        System.out.println("\n\n\n\n\n");
+        System.out.println("Transient field Test");
+        System.out.println("\n\n\n\n\n");
+
+        ExAbsClass eac = new ExAbsClass();
+        System.out.println("verificando que sea instancia de ITransparentDirtyDetector");
+        assertTrue(eac instanceof ITransparentDirtyDetector);
+        ITransparentDirtyDetector itddEac = (ITransparentDirtyDetector) eac;
+        System.out.println("verificando que no esté sucio");
+        assertTrue( !itddEac.___ogm___isDirty());
+        System.out.println("perturbar el campo transiet y verificando que no pase a dirty");
+        eac.setTransient();
+        assertTrue( !itddEac.___ogm___isDirty());
+        System.out.println("verificar que los campos comunes aún funcionan.");
+        eac.shouldBeDirty();
+        assertTrue( itddEac.___ogm___isDirty());
+
+    }
     
     @Test
     public void innerClass() throws Exception {

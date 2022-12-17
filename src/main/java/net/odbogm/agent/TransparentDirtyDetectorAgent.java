@@ -36,6 +36,9 @@ public class TransparentDirtyDetectorAgent {
      * Agente para manipulación de las clases.
      */
     public TransparentDirtyDetectorAgent() {
+        // revisar el siguiente código para imitar la forma de carga del agente
+        // https://jar-download.com/artifacts/net.bytebuddy/byte-buddy-agent/1.7.11/source-code/net/bytebuddy/agent/ByteBuddyAgent.java
+        // método: installExternal
     }
 
     /**

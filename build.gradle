@@ -1,10 +1,11 @@
 plugins {
-    id 'java'
-    id 'maven'
+    id 'java-library'
+    id 'maven-publish'
     id 'signing'
-    id 'net.researchgate.release' version '2.6.0'
-    id 'nu.studer.credentials' version '1.0.7'
-    id 'io.codearte.nexus-staging' version '0.11.0'
+    //id 'net.researchgate.release' version '2.6.0'
+    id 'nu.studer.credentials' version '2.1'
+    //id 'io.codearte.nexus-staging' version '0.21.0'
+     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 // ejecutar: gradle idea 
@@ -16,17 +17,15 @@ idea{
     }
 }
 
-
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-    
 }
 
 
 dependencies {
-    compile 'org.ow2.asm:asm:7.1'
-    compile group: 'org.ow2.asm', name: 'asm-util', version: '7.1'
+    implementation 'org.ow2.asm:asm:9.4'
+    implementation 'org.ow2.asm:asm-util:9.4'
     testImplementation 'junit:junit:[4,)'
 }
 
@@ -151,30 +150,16 @@ test {
 jar {
     manifest {
         attributes(
-      'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-      'Premain-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
-      'Agent-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
-      'Can-Redefine-Classes':true,
-      'Can-Retransform-Classes':true
+            'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
+            'Premain-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
+            'Agent-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
+            'Can-Redefine-Classes':true,
+            'Can-Retransform-Classes':true
         )
     }
 }
 
-//create a single Jar with all dependencies
-task fatJar(type: Jar) {
-    manifest {
-        attributes(
-      'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-      'Premain-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
-      'Agent-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
-      'Can-Redefine-Classes':true,
-      'Can-Retransform-Classes':true
-        )
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
+
 
 
 // de acuerdo a la guía de 
@@ -193,73 +178,52 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-signing {
-    if (project.gradle.startParameter.taskNames.join(",").toLowerCase().contains("release")) {
-        //required { gradle.taskGraph.hasTask("uploadArchives")}
 
-        //    ext."signing.keyId"= credentials.gpgKeyId
-        //    ext."signing.password"= credentials.gpgKeyPassword
-        //    ext."signing.secretKeyRingFile" = credentials.gpgKeyRingFile                
-
-        //    println ext."signing.keyId"
-
-        sign(configurations.archives)
-    }
-}
-
-
-
-
-nexusStaging {
-    packageGroup = "com.github.mdre" //optional if packageGroup == project.getGroup()
-    //    stagingProfileId = "yourStagingProfileId" //when not defined will be got from server using "packageGroup"
-}
+// nexusStaging {
+//     packageGroup = "com.github.mdre" //optional if packageGroup == project.getGroup()
+//     //    stagingProfileId = "yourStagingProfileId" //when not defined will be got from server using "packageGroup"
+// }
 
 //sube a nexus
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment {
-                MavenDeployment deployment -> signing.signPom(deployment) 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            //artifactId = 'my-library'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
             }
             
-            repository(url: "$sonatypeURLRelease") {
-                authentication(userName: credentials.sonatypeUser, password: credentials.sonatypePassword)
-            }
-            
-            snapshotRepository(url: "$sonatypeURLSnapshot") {
-                authentication(userName: credentials.sonatypeUser, password: credentials.sonatypePassword)
-            }
-            
-            pom.groupId = 'com.github.mdre'
-            pom.artifactId = 'odbogm-agent'
-            
-            
-            pom.project {
-                name 'ODBOGM Class Instrumentation Agent'
-                packaging 'jar'
+            pom {
+                name = 'ODBOGM Class Instrumentation Agent'
+                packaging = 'jar'
                 // optionally artifactId can be defined here 
-                description 'ODBOGM Agent instrument class at runtime to detect dirty object.'
-                url 'https://github.com/mdre/odbogm-agent'
+                description = 'ODBOGM Agent instrument class at runtime to detect dirty object.'
+                url = 'https://github.com/mdre/odbogm-agent'
 
                 scm {
-                    connection 'scm:git:git://github.com/mdre/odbogm-agent.git'
-                    developerConnection 'scm:git:ssh://github.com/mdre/odbogm-agent.git'
-                    url 'https://github.com/mdre/odbogm-agent'
+                    connection = 'scm:git:git://github.com/mdre/odbogm-agent.git'
+                    developerConnection = 'scm:git:ssh://github.com/mdre/odbogm-agent.git'
+                    url = 'https://github.com/mdre/odbogm-agent'
                 }
 
                 licenses {
                     license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
-
+                
                 developers {
                     developer {
-                        id 'mdre'
-                        name 'Marcelo D. RE'
-                        email 'marcelo.re@gmail.com'
+                        id = 'mdre'
+                        name = 'Marcelo D. RE'
+                        email = 'marcelo.re@gmail.com'
                     }
                 }
             }
@@ -268,7 +232,11 @@ uploadArchives {
     }
 }
 
-createReleaseTag.dependsOn ':uploadArchives'
+
+
+signing {
+    sign publishing.publications.maven
+}
 
 task runFile(dependsOn: 'classes',type:JavaExec) {
     if (project.hasProperty('mainClass')) {
@@ -276,7 +244,7 @@ task runFile(dependsOn: 'classes',type:JavaExec) {
         classpath = sourceSets.main.runtimeClasspath
         standardOutput = System.out
         errorOutput = System.err
-    }
+    } 
 }
 
 
@@ -288,4 +256,21 @@ task debug(dependsOn: 'classes',type:JavaExec) {
         errorOutput = System.err
         debug true
     }
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes(
+            'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
+            'Premain-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
+            'Agent-Class':'net.odbogm.agent.TransparentDirtyDetectorAgent',
+            'Can-Redefine-Classes':true,
+            'Can-Retransform-Classes':true
+        )
+    }
+    baseName = project.name + '-all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }

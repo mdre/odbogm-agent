@@ -1,9 +1,12 @@
 package net.odbogm.agent;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 
 /**
  *
@@ -14,6 +17,7 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
     private final static Logger LOGGER = Logger.getLogger(WriteAccessActivatorAdapter.class.getName());
     private boolean activate = false;
     private String owner;
+    private List<String> ignoreFields;
 
     static {
         if (LOGGER.getLevel() == null) {
@@ -21,8 +25,9 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
         }
     }
     
-    public WriteAccessActivatorAdapter(MethodVisitor mv) {
-        super(Opcodes.ASM7, mv);
+    public WriteAccessActivatorAdapter(MethodVisitor mv, List ignoreFields) {
+        super(Opcodes.ASM9, mv);
+        this.ignoreFields = ignoreFields;
     }
 
     /**
@@ -45,15 +50,16 @@ public class WriteAccessActivatorAdapter extends MethodVisitor implements ITrans
 
     @Override
     public synchronized void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        LOGGER.log(Level.FINEST, "owner: {0} - name: {1} - desc: {2}", new Object[]{owner, name, desc});
-        if (opcode == Opcodes.PUTFIELD) {
+        LOGGER.log(Level.FINEST, "owner: {0} - name: {1} - desc: {2} - transient: {3}", new Object[]{owner, name, desc, ignoreFields.contains(name)});
+        
+        if ((opcode == Opcodes.PUTFIELD) && (!ignoreFields.contains(name))) {
             this.activate = true;
             this.owner = owner;
         } 
         mv.visitFieldInsn(opcode, owner, name, desc); 
         LOGGER.log(Level.FINEST, "fin --------------------------------------------------");
     }
-
+    
     @Override
     public void visitEnd() {
         LOGGER.log(Level.FINEST, "fin MethodVisitor -------------------------------------");
