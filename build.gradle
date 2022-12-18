@@ -60,7 +60,6 @@ println "***************************************************************"
 // 4. Una vez cerrado hacer click en "Release"
 
 
-
 //Para guardar el usuario y contraseña en forma segura hacer:
 //gradle addCredentials -PcredentialsKey=nexusUser -PcredentialsValue=XXXXX
 //gradle addCredentials -PcredentialsKey=nexusPassword -PcredentialsValue=YYYYY
